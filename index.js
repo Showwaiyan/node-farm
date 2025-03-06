@@ -1,6 +1,7 @@
 const fs = require("fs");
 const http = require("http");
 const url = require("url");
+const replaceHTML = require("./modules/replaceHtml");
 
 // Reading Json
 const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, "utf-8");
@@ -10,18 +11,6 @@ const dataObj = JSON.parse(data);
 const templOverview = fs.readFileSync(`${__dirname}/templates/template-overview.html`, "utf-8");
 const templCards = fs.readFileSync(`${__dirname}/templates/template-card.html`, "utf-8");
 const templProduct = fs.readFileSync(`${__dirname}/templates/template-product.html`, "utf-8");
-
-// Changing placeholder in HTML template
-const replaceHTML = function (templ, product) {
-	let output = templ;
-	Object.keys(product).forEach((key) => {
-		key === "organic" && !product[key]
-			? (output = output.replace(new RegExp(`{%${key.toUpperCase()}%}`, "g"), "not-organic"))
-			: "";
-		output = output.replace(new RegExp(`{%${key.toUpperCase()}%}`, "g"), product[key]);
-	});
-	return output;
-};
 
 // Create Server and Route
 const server = http.createServer((req, res) => {
