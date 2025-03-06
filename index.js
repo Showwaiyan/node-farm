@@ -1,5 +1,6 @@
 const fs = require("fs");
 const http = require("http");
+const url = require("url");
 
 // Reading Json
 const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, "utf-8");
@@ -8,6 +9,7 @@ const dataObj = JSON.parse(data);
 // Reading HTML Template
 const templOverview = fs.readFileSync(`${__dirname}/templates/template-overview.html`, "utf-8");
 const templCards = fs.readFileSync(`${__dirname}/templates/template-card.html`, "utf-8");
+const templProduct = fs.readFileSync(`${__dirname}/templates/template-product.html`, "utf-8");
 
 // Changing placeholder in HTML template
 const replaceHTML = function (templ, product) {
@@ -23,16 +25,21 @@ const replaceHTML = function (templ, product) {
 
 // Create Server and Route
 const server = http.createServer((req, res) => {
-	const path = req.url;
+	const {
+		query: { id },
+		pathname,
+	} = url.parse(req.url, true);
 
 	res.writeHead(200, { "content-type": "text/html" });
 
-	if (path === "/" || path === "/overview") {
+	if (pathname === "/" || pathname === "/overview") {
 		const output = templOverview.replace(
 			new RegExp(`{%PRODUCT_CARDS%}`, "g"),
 			dataObj.map((el) => replaceHTML(templCards, el)).join("")
 		);
-
+		res.end(output);
+	} else if (pathname === "/product") {
+		const output = replaceHTML(templProduct, dataObj[id]);
 		res.end(output);
 	}
 });
